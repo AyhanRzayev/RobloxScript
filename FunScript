@@ -1,0 +1,96 @@
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+-- Define the whitelist with Usernames
+local whitelistedUsernames = {
+    "Player1",  -- bobafett346
+    "Player2",  -- Another Example Username
+}
+
+-- Function to check if player is whitelisted
+local function isPlayerWhitelisted(player)
+    for _, username in ipairs(whitelistedUsernames) do
+        if player.Name == username then
+            return true
+        end
+    end
+    return false
+end
+
+-- Early exit if the player is not whitelisted
+if not isPlayerWhitelisted(player) then
+    print("You are not whitelisted. Script will not execute.")
+    return  -- Stops the script from executing any further
+end
+
+-- Paths to the three TextLabels
+local textLabel1 = player.PlayerGui.StatReroll.grid.UnitStats.Attack.Main.TextLabel -- First text label
+local textLabel2 = player.PlayerGui.StatFuse.grid.List.Outer.Main.UnitFuseStats_Receive.Attack.Main.TextLabel -- Second text label
+local textLabel3 = player.PlayerGui.StatFuse.grid.List.Outer.Main.UnitFuseStats_ToFuse.Attack.Main.TextLabel -- Third text label
+
+-- Variables to control the updates
+local isEditing = false
+local isEditing3 = false -- For the third label
+local targetNumber = 20.1 -- Example target number to show
+local connection -- Stores the Heartbeat connection
+local connection3 -- Stores the connection for the third label
+
+-- Function to update the first two TextLabels
+local function updateTextLabels()
+    textLabel1.Text = "+" .. tostring(targetNumber) .. "%"
+    textLabel2.Text = "+" .. tostring(targetNumber) .. "%"
+end
+
+-- Function to update the third TextLabel
+local function updateTextLabel3()
+    textLabel3.Text = "+" .. tostring(targetNumber) .. "%"
+end
+
+-- Function to start/stop updating the first two labels
+local function toggleEditing()
+    isEditing = not isEditing
+
+    if isEditing then
+        connection = runService.Heartbeat:Connect(function()
+            if isEditing then
+                updateTextLabels()
+            else
+                if connection then connection:Disconnect() end
+            end
+        end)
+    elseif connection then
+        connection:Disconnect()
+    end
+end
+
+-- Function to start/stop updating the third label
+local function toggleEditing3()
+    isEditing3 = not isEditing3
+
+    if isEditing3 then
+        connection3 = runService.Heartbeat:Connect(function()
+            if isEditing3 then
+                updateTextLabel3()
+            else
+                if connection3 then connection3:Disconnect() end
+            end
+        end)
+    elseif connection3 then
+        connection3:Disconnect()
+    end
+end
+
+-- Keybind handling for the first two labels (Press "T" to toggle)
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.T then
+        toggleEditing()
+    end
+end)
+
+-- Keybind handling for the third label (Press "Y" to toggle)
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Y then
+        toggleEditing3()
+    end
+end)
